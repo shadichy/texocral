@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LaTeX OCR</title>
+  <!-- Material Design 3 CSS -->
+  <link href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css" rel="stylesheet">
+  <style>
+    body {
+      font-family: Roboto, sans-serif;
+      margin: 2rem;
+      background-color: #f5f5f5;
+    }
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background: white;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .output {
+      margin-top: 1rem;
+      background: #e0e0e0;
+      padding: 1rem;
+      border-radius: 4px;
+      min-height: 2em;
+    }
+  </style>
+
+  <!-- MathJax -->
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h2>LaTeX OCR</h2>
+    <input type="file" id="imageInput" accept="image/*" />
+    <button id="submitBtn" class="mdc-button mdc-button--raised">
+      <span class="mdc-button__label">Submit</span>
+    </button>
+    <div class="output" id="output"></div>
+  </div>
+
+  <!-- Material Design 3 JS -->
+  <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
+  <script>
+    document.getElementById('submitBtn').addEventListener('click', () => {
+      const fileInput = document.getElementById('imageInput');
+      const outputDiv = document.getElementById('output');
+      const file = fileInput.files[0];
+      if (!file) {
+        outputDiv.textContent = 'Please select an image file.';
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        const base64Image = reader.result;
+        fetch('/api/latex_ocr', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ image: base64Image })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.latex) {
+            // Render LaTeX via MathJax
+            outputDiv.innerHTML = `$$${data.latex}$$`;
+            if (window.MathJax) {
+              MathJax.typesetPromise([outputDiv]).catch(err => console.error(err));
+            }
+          } else if (data.error) {
+            outputDiv.textContent = 'Error: ' + data.error;
+          }
+        })
+        .catch(error => {
+          outputDiv.textContent = 'Error: ' + error;
+        });
+      };
+      reader.readAsDataURL(file);
+    });
+  </script>
+</body>
+</html>

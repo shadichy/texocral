@@ -1,0 +1,25 @@
+# requirements.txt
+
+# Core deep learning and model libraries
+torch
+torchvision
+timm
+x_transformers
+einops
+
+# Hugging Face ecosystem
+huggingface_hub
+datasets
+transformers
+tokenizers
+
+# Image processing and numerical utilities
+Pillow
+numpy
+
+# Web requests (for loading image URLs from datasets)
+requests
+
+# Progress bars and utilities
+tqdm
+scikit-learn # For potential evaluation metrics or data splitting utilities
